@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>17 и 19 декабря</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Work+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#0f1626;
+    --navy-mid:#1b2740;
+    --cream:#f3efe6;
+    --cream-dim:#c9c4b6;
+    --amber:#e8a94c;
+    --rose:#c97b84;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:radial-gradient(ellipse at 50% 0%, var(--navy-mid), var(--navy-deep) 65%);
+    font-family:'Work Sans', sans-serif;
+    color:var(--cream);
+    overflow:hidden;
+    position:relative;
+  }
+
+  /* one orchestrated snowfall, subtle, behind everything */
+  #snow{position:fixed; inset:0; pointer-events:none; z-index:0;}
+  #snow span{
+    position:absolute; top:-10px;
+    display:block; border-radius:50%;
+    background:var(--cream);
+    opacity:0.55;
+    animation:fall linear infinite;
+  }
+  @keyframes fall{
+    to{ transform:translateY(110vh); }
+  }
+
+  .card{
+    position:relative; z-index:1;
+    width:min(520px, 90vw);
+    padding:56px 44px 44px;
+    text-align:center;
+  }
+
+  .dates{
+    font-family:'Work Sans', sans-serif;
+    font-weight:400;
+    font-size:13px;
+    letter-spacing:0.14em;
+    color:var(--amber);
+    margin:0 0 18px;
+  }
+  .dates span{ color:var(--rose); }
+
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-style:italic;
+    font-size:clamp(28px, 5vw, 40px);
+    line-height:1.15;
+    margin:0 0 34px;
+    color:var(--cream);
+  }
+
+  .frame{
+    border:1px solid rgba(243,239,230,0.18);
+    border-radius:2px;
+    padding:36px 30px;
+    min-height:150px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  #wish{
+    font-family:'Fraunces', serif;
+    font-weight:400;
+    font-size:19px;
+    line-height:1.55;
+    color:var(--cream);
+    max-width:38ch;
+    opacity:1;
+    transition:opacity 0.5s ease;
+  }
+  #wish.fade{ opacity:0; }
+
+  .controls{
+    margin-top:30px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:22px;
+  }
+
+  #counter{
+    font-size:12px;
+    letter-spacing:0.08em;
+    color:var(--cream-dim);
+    min-width:40px;
+  }
+
+  button{
+    background:none;
+    border:1px solid rgba(243,239,230,0.35);
+    color:var(--cream);
+    font-family:'Work Sans', sans-serif;
+    font-size:13px;
+    letter-spacing:0.04em;
+    padding:10px 22px;
+    border-radius:2px;
+    cursor:pointer;
+    transition:border-color 0.25s ease, color 0.25s ease;
+  }
+  button:hover{ border-color:var(--amber); color:var(--amber); }
+  button:focus-visible{ outline:2px solid var(--amber); outline-offset:2px; }
+
+  @media (prefers-reduced-motion: reduce){
+    #snow span{ animation:none; display:none; }
+    #wish, #wish.fade{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="snow"></div>
+
+<div class="card">
+  <p class="dates">17.12 — полгода <span>·</span> 19.12 — твой день</p>
+  <h1>Два дня, один я,<br>и всё, что хочу сказать</h1>
+
+  <div class="frame">
+    <p id="wish"></p>
+  </div>
+
+  <div class="controls">
+    <button id="prev" aria-label="Предыдущее">←</button>
+    <span id="counter"></span>
+    <button id="next" aria-label="Следующее">→</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   ПИШИ СЮДА. Каждая строка в кавычках — одно пожелание/мысль.
+   Их можно пролистывать стрелками ← →.
+   Порядок — как в списке. Можно добавлять и убирать сколько угодно.
+   ============================================================ */
+const WISHES = [
+  "Первое пожелание пиши здесь.",
+  "Второе — здесь.",
+  "И так далее, строк может быть сколько угодно.",
+];
+/* ============================================================ */
+
+let i = 0;
+const wishEl = document.getElementById('wish');
+const counterEl = document.getElementById('counter');
+
+function render(){
+  wishEl.textContent = WISHES[i];
+  counterEl.textContent = (i+1) + ' / ' + WISHES.length;
+}
+
+function step(delta){
+  wishEl.classList.add('fade');
+  setTimeout(() => {
+    i = (i + delta + WISHES.length) % WISHES.length;
+    render();
+    wishEl.classList.remove('fade');
+  }, 250);
+}
+
+document.getElementById('next').addEventListener('click', () => step(1));
+document.getElementById('prev').addEventListener('click', () => step(-1));
+render();
+
+// снег — один раз генерируется, дальше просто падает
+const snowContainer = document.getElementById('snow');
+const FLAKES = 40;
+for (let n = 0; n < FLAKES; n++){
+  const f = document.createElement('span');
+  const size = 2 + Math.random() * 3;
+  f.style.width = size + 'px';
+  f.style.height = size + 'px';
+  f.style.left = Math.random() * 100 + 'vw';
+  f.style.animationDuration = (8 + Math.random() * 10) + 's';
+  f.style.animationDelay = (Math.random() * 10) + 's';
+  snowContainer.appendChild(f);
+}
+</script>
+
+</body>
+</html>
